@@ -1,8 +1,11 @@
 
 import { useState, useRef } from 'react';
 import classes from './AuthForm.module.css';
+import { useContext } from 'react';
+import AuthContext from '../../store/auth-context';
 
 const AuthForm = () => {
+    const authCtx = useContext(AuthContext);
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
@@ -64,8 +67,7 @@ const AuthForm = () => {
         }
       })
       .then((data) => {
-        console.log('JWT Token:', data.idToken);
-
+       authCtx.login(data.idToken);
         alert(
           isLogin
             ? 'Login Successful!'
