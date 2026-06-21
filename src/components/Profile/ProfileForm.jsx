@@ -15,8 +15,8 @@ const ProfileForm = () => {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
+          method: 'POST',
+          body: JSON.stringify({
           idToken: authCtx.token, // Current user's token
           password: enteredNewPassword,
           returnSecureToken: true,
@@ -42,7 +42,12 @@ const ProfileForm = () => {
     <form className={classes.form} onSubmit={submitHandler}>
       <div className={classes.control}>
         <label htmlFor='new-password'>New Password</label>
-        <input type='password' id='new-password' minLength='7' ref={newPasswordInputRef} required />
+        <input 
+        type='password'
+         id='new-password' 
+         minLength='7' 
+         ref={newPasswordInputRef}
+         required />
       </div>
       <div className={classes.action}>
         <button>Change Password</button>

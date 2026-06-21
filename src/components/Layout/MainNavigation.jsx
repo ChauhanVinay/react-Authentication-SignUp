@@ -1,16 +1,18 @@
 import { useContext } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import classes from './MainNavigation.module.css';
 import AuthContext from "../../store/auth-context";
 
 const MainNavigation = () => {
     const authCtx  = useContext(AuthContext);
-
-    const isLoggedIn = authCtx.isLoggedIn;
+    const history = useHistory();//Hook for redirection
 
     const logoutHandler = () => {
-        authCtx.logout();
+      authCtx.logout();//Set the local storage to null (and clear localStorage)
+      history.replace('/auth');//Redirect the user to the login page
     };
+    const isLoggedIn = authCtx.isLoggedIn;
+    
   return (
     <header className={classes.header}>
       <Link to="/">
