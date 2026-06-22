@@ -4,6 +4,14 @@ import AuthContext from './auth-context';
 
 const API_KEY = 'AIzaSyCONfqWrXYm2ZF4goNOeAzquBy-lidEx8U';
 
+// Helper Function
+const calculateRemainingTime = (expirationTime) => {
+  const currentTime = new Date().getTime();
+  const adjustedExpirationTime = new Date(expirationTime).getTime();
+
+  return adjustedExpirationTime - currentTime;
+};
+
 const AuthContextProvider = (props) => {
   const initialToken = localStorage.getItem('token');
 
@@ -13,17 +21,43 @@ const AuthContextProvider = (props) => {
 
   const logoutHandler = useCallback(() => {
     setToken(null);
+
     localStorage.removeItem('token');
+    localStorage.removeItem('expirationTime');
   }, []);
 
   const loginHandler = (token) => {
-    setToken(token);
+    // Token valid for 5 minutes
+    const expirationTime = new Date(
+      new Date().getTime() + 5 * 60 * 1000
+    );
+
     localStorage.setItem('token', token);
+    localStorage.setItem(
+      'expirationTime',
+      expirationTime.toISOString()
+    );
+
+    setToken(token);
   };
 
+  // Validate token when app loads
   useEffect(() => {
     const validateToken = async () => {
-      if (!token) {
+      const storedToken = localStorage.getItem('token');
+      const storedExpirationTime =
+        localStorage.getItem('expirationTime');
+
+      if (!storedToken || !storedExpirationTime) {
+        return;
+      }
+
+      const remainingTime =
+        calculateRemainingTime(storedExpirationTime);
+
+      // Token expired
+      if (remainingTime <= 0) {
+        logoutHandler();
         return;
       }
 
@@ -36,7 +70,7 @@ const AuthContextProvider = (props) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              idToken: token,
+              idToken: storedToken,
             }),
           }
         );
@@ -45,19 +79,40 @@ const AuthContextProvider = (props) => {
 
         if (!response.ok) {
           throw new Error(
-            data.error?.message || 'Token validation failed'
+            data.error?.message || 'Invalid Token'
           );
         }
 
-        console.log('Token Valid');
+        setToken(storedToken);
       } catch (error) {
         console.log('Token Invalid:', error.message);
-
         logoutHandler();
       }
     };
 
     validateToken();
+  }, [logoutHandler]);
+
+  // Auto logout after expiration
+  useEffect(() => {
+    const expirationTime =
+      localStorage.getItem('expirationTime');
+
+    if (!token || !expirationTime) {
+      return;
+    }
+
+    const remainingTime =
+      calculateRemainingTime(expirationTime);
+
+    const timer = setTimeout(() => {
+      alert('Session expired. Please login again.');
+      logoutHandler();
+    }, remainingTime);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [token, logoutHandler]);
 
   const contextValue = {
@@ -75,3 +130,4 @@ const AuthContextProvider = (props) => {
 };
 
 export default AuthContextProvider;
+

@@ -67,9 +67,8 @@ const AuthForm = () => {
         }
       })
       .then((data) => {
-      localStorage.setItem('token', data.idToken);
-      
        authCtx.login(data.idToken);
+       
         alert(
           isLogin
             ? 'Login Successful!'
