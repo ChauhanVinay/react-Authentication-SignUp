@@ -6,6 +6,7 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import { useContext } from 'react';
 import AuthContext from './store/auth-context';
+import './App.css';
 
 function App() {
   const authCtx = useContext(AuthContext);
